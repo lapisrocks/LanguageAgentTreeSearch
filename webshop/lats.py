@@ -569,8 +569,7 @@ def rollout(node, args, task, idx, max_depth=15):
         depth += 1
         if depth == max_depth:
             node.reward = -0.5
-    return node  # Return the terminal node or node at max_depth
- # Return the terminal node or node at max_depth
+    return node  
 
 def select_node(node):
     while node and node.children:
@@ -599,38 +598,6 @@ def select_node(node):
         logging.info(f"Selected node at depth {node.depth} with UCT {node.uct()}.")
         
     return node 
-
-# def select_node(node, temperature=1.0):
-#     while node and node.children:
-#         logging.info(f"Selecting from {len(node.children)} children at depth {node.depth}.")
-        
-#         terminal_children = [child for child in node.children if child.is_terminal]
-        
-#         if len(terminal_children) == len(node.children):
-#             logging.info(f"All children are terminal at depth {node.depth}. Backtracking...")
-#             if node.parent:  
-#                 node.parent.children.remove(node)
-#             node = node.parent  
-#             continue  
-        
-#         node_with_reward_1 = next((child for child in terminal_children if child.reward == 1), None)
-#         if node_with_reward_1:
-#             logging.info(f"Found terminal node with reward 1 at depth {node.depth}.")
-#             return node_with_reward_1
-
-#         # Use softmax for the selection among non-terminal nodes
-#         #uct_values = np.array([child.uct() for child in node.children if not child.is_terminal])
-        
-#         # Add a small value to prefer nodes with smaller depth in case of a tie
-#         #tie_breaker = np.array([1e-6 * child.depth for child in node.children if not child.is_terminal])
-#         #modified_uct_values = uct_values - tie_breaker
-
-#         #probabilities = softmax(modified_uct_values, temperature)
-#         #node = np.random.choice([child for child in node.children if not child.is_terminal], p=probabilities)
-
-#         logging.info(f"Selected node at depth {node.depth} with UCT {node.uct()}.")
-        
-#     return node  # This will return None if all paths from the root are exhausted
 
 def expand_node(node, args, task, idx):
     n = args.n_generate_sample

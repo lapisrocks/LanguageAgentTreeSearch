@@ -165,7 +165,7 @@ def collect_trajectory(node):
         node = node.parent
     return '\n'.join(reversed(trajectory))
 
-def mcts_search(args, task, idx, iterations=50, to_print=True):
+def lats_search(args, task, idx, iterations=50, to_print=True):
     global gpt
     global failed_trajectories
     global reflection_map
