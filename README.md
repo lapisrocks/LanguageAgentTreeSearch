@@ -72,6 +72,8 @@ sh run_mcts.sh
 
 ``root/`` contains all the trajectories from the paper's experiments
 
+Code adapted from https://github.com/noahshinn024/reflexion/tree/main
+
 ### Decision-making (WebShop)
 
 #### Setup
