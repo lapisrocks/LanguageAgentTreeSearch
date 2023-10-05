@@ -53,7 +53,6 @@ def parse_args():
     args.add_argument('--n_generate_sample', type=int, default=1)  # only thing needed if naive_run
     args.add_argument('--n_evaluate_sample', type=int, default=1)
     args.add_argument('--iterations', type=int, default=30)
-    args.add_argument('--mcts', action='store_true')
     args.add_argument('--log', type=str)
 
     args = args.parse_args()
