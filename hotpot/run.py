@@ -20,7 +20,7 @@ def run(args):
 
     for i in range(args.task_start_index, args.task_end_index):
         # solve
-        state, value, all_nodes, reward, em = mcts_search(args, task, i, args.iterations, True)
+        state, value, all_nodes, reward, em = lats_search(args, task, i, args.iterations, True)
 
          # log main metric
         if em is None:
@@ -43,7 +43,6 @@ def parse_args():
     args.add_argument('--prompt_sample', type=str, choices=['standard', 'cot'])
     args.add_argument('--n_generate_sample', type=int, default=1)  
     args.add_argument('--n_evaluate_sample', type=int, default=1)
-    args.add_argument('--mcts', action='store_true')
     args.add_argument('--iterations', type=int, default=50)
     args.add_argument('--log', type=str)
 
