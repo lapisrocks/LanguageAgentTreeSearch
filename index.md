@@ -1,13 +1,10 @@
 
-# Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models
-
-  
 [Paper](URL_FOR_PAPER) | [Code](https://github.com/andyz245/LanguageAgentTreeSearch) | [Demo](https://huggingface.co/spaces/AIatUIUC/CodeLATS) | [BibTex](URL_FOR_BIBTEX)
   
 
 ![teaser](pics/related.png)
 
-  
+# Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models
 
 Language models can use reasoning and enhance acting for decision-making tasks (ReAct, Reflexion). Planning can also enhance reasoning through search (RAP, ToT). We show that through LATS, unifying reasoning, acting, and planning is the best approach for both reasoning and decision-making tasks.
 
