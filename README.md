@@ -7,6 +7,9 @@
     <a href="https://copyright.illinois.edu/">
         <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
     </a>
+    <a href="https://uiuc.ai/">
+        <img alt="AI@UIUC">
+    </a>
 </p>
 
 ![teaser](pics/teaser.png)
