@@ -8,7 +8,7 @@
         <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
     </a>
     <a href="https://uiuc.ai/">
-        <img alt="AI@UIUC">
+        <img alt="AI@UIUC" src="https://img.shields.io/badge/AI@UIUC?color=green">
     </a>
 </p>
 
