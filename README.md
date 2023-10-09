@@ -26,7 +26,7 @@ To get started:
 
 1. Clone this repo and move to the HotPotQA directory:
 ```bash
-git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd hotpot
+git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd LanguageAgentTreeSearch/hotpot
 ```
 
 2. Install the module dependencies into your environment:
@@ -56,7 +56,7 @@ To get started:
 
 1. Clone this repo and move to the HotPotQA directory:
 ```bash
-git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd programming
+git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd LanguageAgentTreeSearch/programming
 ```
 
 2. Install the module dependencies into your environment:
@@ -86,7 +86,7 @@ To get started:
 
 1. Clone this repo and move to the WebShop directory:
 ```bash
-git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd webshop
+git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd LanguageAgentTreeSearch/webshop
 ```
 
 2. Install WebShop from source and run environment instance locally. (https://github.com/princeton-nlp/WebShop)
