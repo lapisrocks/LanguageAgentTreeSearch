@@ -97,7 +97,9 @@ pip install -r requirements.txt
 export OPENAI_API_KEY=<your key>
 ```
 
-5. Set the scripts and run paper experiments
+5. Change localhost in lats.py to your port running WebShop
+
+6. Set the scripts and run paper experiments
 ```bash
 sh lats.sh
 ```
