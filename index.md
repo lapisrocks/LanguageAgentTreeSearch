@@ -53,7 +53,7 @@ Please cite the paper and star this repo if you use LATS and find it interesting
 
 ```bibtex
 
-  @misc{zhou2023language,
+@misc{zhou2023language,
       title={Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models}, 
       author={Andy Zhou and Kai Yan and Michal Shlapentokh-Rothman and Haohan Wang and Yu-Xiong Wang},
       year={2023},
