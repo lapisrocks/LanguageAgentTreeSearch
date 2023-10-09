@@ -1,5 +1,5 @@
 
-[Paper](URL_FOR_PAPER) | [Code](https://github.com/andyz245/LanguageAgentTreeSearch) | [Demo](https://huggingface.co/spaces/AIatUIUC/CodeLATS) | [BibTex](URL_FOR_BIBTEX)
+[Paper](https://arxiv.org/abs/2310.04406) | [Code](https://github.com/andyz245/LanguageAgentTreeSearch) | [Demo](https://huggingface.co/spaces/AIatUIUC/CodeLATS) 
   
 
 ![teaser](pics/related.png)
@@ -53,6 +53,13 @@ Please cite the paper and star this repo if you use LATS and find it interesting
 
 ```bibtex
 
-  
+  @misc{zhou2023language,
+      title={Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models}, 
+      author={Andy Zhou and Kai Yan and Michal Shlapentokh-Rothman and Haohan Wang and Yu-Xiong Wang},
+      year={2023},
+      eprint={2310.04406},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
+}
 
 ```
