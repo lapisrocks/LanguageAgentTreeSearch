@@ -67,7 +67,7 @@ export OPENAI_API_KEY=<your key>
 
 4. Set the scripts and run paper experiments
 ```bash
-sh run_mcts.sh
+sh run_lats.sh
 ```
 
 ``root/`` contains all the trajectories from the paper's experiments
