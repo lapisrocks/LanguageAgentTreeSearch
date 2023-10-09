@@ -3,3 +3,4 @@ dist/
 .env
 *.pyc
 *.DS_Store
+**/logs

@@ -11,6 +11,9 @@ def run(args):
     task = HotPotQATask()
     print(task)
     logs, cnt_avg, cnt_any = [], 0, 0
+
+    # create log directories if they don't exist
+    os.makedirs(os.path.dirname(args.log), exist_ok=True)
     
     logging.basicConfig(filename=args.log, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='a')
 
