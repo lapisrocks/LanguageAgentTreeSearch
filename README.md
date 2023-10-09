@@ -11,7 +11,7 @@
 
 ![teaser](pics/teaser.png)
 
-Official implementation for paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models]() with code, prompts, model outputs.
+Official implementation for paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models]() with code, prompts, model outputs. More can be found at https://andyz245.github.io/LanguageAgentTreeSearch/
 
 
 ### Reasoning + Acting (HotPotQA)
@@ -67,7 +67,7 @@ export OPENAI_API_KEY=<your key>
 
 4. Set the scripts and run paper experiments
 ```bash
-sh run_mcts.sh
+sh run_lats.sh
 ```
 
 ``root/`` contains all the trajectories from the paper's experiments
@@ -108,5 +108,13 @@ sh lats.sh
 Please cite the paper and star this repo if you use LATS and find it interesting/useful, thanks! Feel free to contact andyz3@illinois.edu or open an issue if you have any questions.
 
 ```bibtex
+@misc{zhou2023language,
+      title={Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models}, 
+      author={Andy Zhou and Kai Yan and Michal Shlapentokh-Rothman and Haohan Wang and Yu-Xiong Wang},
+      year={2023},
+      eprint={2310.04406},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
+}
 
 ```
