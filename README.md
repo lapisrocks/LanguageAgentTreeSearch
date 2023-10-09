@@ -108,5 +108,13 @@ sh lats.sh
 Please cite the paper and star this repo if you use LATS and find it interesting/useful, thanks! Feel free to contact andyz3@illinois.edu or open an issue if you have any questions.
 
 ```bibtex
+@misc{zhou2023language,
+      title={Language Agent Tree Search Unifies Reasoning Acting and Planning in Language Models}, 
+      author={Andy Zhou and Kai Yan and Michal Shlapentokh-Rothman and Haohan Wang and Yu-Xiong Wang},
+      year={2023},
+      eprint={2310.04406},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
+}
 
 ```
