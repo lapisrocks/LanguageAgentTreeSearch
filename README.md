@@ -11,7 +11,11 @@
 
 ![teaser](pics/teaser.png)
 
-Official implementation for paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models]() with code, prompts, model outputs. More can be found at https://andyz245.github.io/LanguageAgentTreeSearch/
+Official implementation for paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models]() with code, prompts, model outputs. 
+
+More can be found at https://andyz245.github.io/LanguageAgentTreeSearch/
+
+Check out our demo, CodeLATS at https://huggingface.co/spaces/AIatUIUC/CodeLATS/tree/main
 
 
 ### Reasoning + Acting (HotPotQA)
