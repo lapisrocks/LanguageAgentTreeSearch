@@ -80,22 +80,24 @@ Code adapted from https://github.com/noahshinn024/reflexion/tree/main
 
 To get started:
 
-1. Clone this repo and move to the HotPotQA directory:
+1. Clone this repo and move to the WebShop directory:
 ```bash
 git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd webshop
 ```
 
-2. Install the module dependencies into your environment:
+2. Install WebShop from source and run environment instance locally. (https://github.com/princeton-nlp/WebShop)
+
+3. Install the module dependencies into your environment:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set `OPENAI_API_KEY` environment variable to your OpenAI API key:
+4. Set `OPENAI_API_KEY` environment variable to your OpenAI API key:
 ```bash
 export OPENAI_API_KEY=<your key>
 ```
 
-4. Set the scripts and run paper experiments
+5. Set the scripts and run paper experiments
 ```bash
 sh lats.sh
 ```
