@@ -87,7 +87,7 @@ To get started:
 git clone https://github.com/andyz245/LanguageAgentTreeSearch && cd LanguageAgentTreeSearch/webshop
 ```
 
-2. Install WebShop from source and run environment instance locally. (https://github.com/princeton-nlp/WebShop)
+2. Install WebShop from source and run environment instance locally. Follow the instructions here (https://github.com/princeton-nlp/WebShop)
 
 3. Install the module dependencies into your environment:
 ```bash
@@ -99,7 +99,7 @@ pip install -r requirements.txt
 export OPENAI_API_KEY=<your key>
 ```
 
-5. Change localhost in lats.py to your port running WebShop
+5. Change localhost in lats.py to your local port running WebShop
 
 6. Set the scripts and run paper experiments
 ```bash
