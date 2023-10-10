@@ -10,5 +10,3 @@ python run.py \
     --log logs/new_run.log \
     ${@}
 
-
-# 0.3 dollars per line ->  30 dollars for 100 lines
