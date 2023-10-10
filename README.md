@@ -74,8 +74,6 @@ export OPENAI_API_KEY=<your key>
 sh run_lats.sh
 ```
 
-``root/`` contains all the trajectories from the paper's experiments
-
 Code adapted from https://github.com/noahshinn024/reflexion/tree/main
 
 ### Decision-making (WebShop)
@@ -111,6 +109,9 @@ sh lats.sh
 - ``--n_generate_sample``: number of times to prompt during expansion/sampling
 - ``--n_evaluate_sample``: number of times to prompt for state evaluation
 - ``--iterations``: maximum number of trajectories to sample
+
+## Trajectories
+``root/`` contains all the trajectories from the paper's experiments on programming. Please use get_acc.py with the log path to get the actual accuracy. HotPotQA and WebShop logs were too large to upload, feel free to email if interested.
 
 ## Citations
 Please cite the paper and star this repo if you use LATS and find it interesting/useful, thanks! Feel free to contact andyz3@illinois.edu or open an issue if you have any questions.
