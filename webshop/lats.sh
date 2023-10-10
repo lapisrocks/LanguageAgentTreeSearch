@@ -10,3 +10,5 @@ python run.py \
     --log logs/new_run.log \
     ${@}
 
+# remember to change the url in lats.py to your local instance of WebShop 
+
