@@ -1,5 +1,5 @@
 python main.py \
-  --run_name "test-gpt4" \
+  --run_name "test_gpt4" \
   --root_dir "root" \
   --dataset_path ./benchmarks/humaneval-py.jsonl \
   --strategy "mcts" \

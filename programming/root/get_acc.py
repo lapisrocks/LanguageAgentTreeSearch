@@ -43,7 +43,7 @@ def calculate_overall_accuracy(filename):
     else:
         return overall_correct / overall_count, overall_count
 
-filename = "/home/andyz3/reflexion/programming_runs/root/test_rap_hard_acc_full_6tst_temp/mbpp-py._mcts_8_gpt-3.5-turbo_pass_at_k_1_py.jsonl"
+filename = "/Users/andyzhou/Documents/Research/LLMPlanning/programming/root/test_mcts_hard_acc_full_4tst_temp_gpt4/humaneval-py._mcts_8_gpt-4_pass_at_k_1_py.jsonl"
 res = calculate_overall_accuracy(filename)
 overall_avg = res[0]
 count = res[1]
