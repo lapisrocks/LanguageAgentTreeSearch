@@ -18,3 +18,4 @@ urllib3==2.0.2
 yarl==1.9.2
 pandas==2.0.3
 gym
+transformers
