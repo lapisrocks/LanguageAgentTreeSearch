@@ -1,9 +1,8 @@
 from utils import enumerate_resume, make_printv, write_jsonl, resume_success_count
 from executors import executor_factory
 from generators import generator_factory, model_factory
-from typing import List, Dict, Any
+from typing import List, Dict, Tuple, Any
 import math
-from typing import Tuple
 import sys
 
 sys.set_int_max_str_digits(100000)  # Increase the limit to 10000 digits
