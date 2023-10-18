@@ -114,7 +114,7 @@ sh lats.sh
 ``programming/root/`` contains all the trajectories from the paper's experiments on programming. Please use get_acc.py with the log path to get the actual accuracy. HotPotQA and WebShop logs were too large to upload, feel free to email if interested.
 
 ## Citations
-Please cite the paper and star this repo if you use LATS and find it interesting/useful, thanks! Feel free to contact andyz3@illinois.edu or open an issue if you have any questions.
+Please cite the paper and star this repo if you use LATS and find it interesting. Feel free to contact andyz3@illinois.edu or open an issue if you have any questions.
 
 ```bibtex
 @misc{zhou2023language,
