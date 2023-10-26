@@ -104,6 +104,9 @@ def run_mcts(
     cur_func_impl = None
 
     for idx, item in enumerate(dataset):
+        
+        cur_func_impl = None
+
         if is_leetcode:
             tests_i = item['visible_tests']
         else:
