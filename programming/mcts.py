@@ -97,6 +97,7 @@ def run_mcts(
     exe = executor_factory(language, is_leet=is_leetcode)
     gen = generator_factory(language)
     model = model_factory(model_name)
+    test_model = model_factory("gpt4")
     print_v = make_printv(verbose)
 
     num_items = len(dataset)
@@ -110,7 +111,7 @@ def run_mcts(
         if is_leetcode:
             tests_i = item['visible_tests']
         else:
-            tests_i = gen.internal_tests(item["prompt"], model, 4)
+            tests_i = gen.internal_tests(item["prompt"], test_model, 6)
 
         while cur_func_impl is None:
             cur_func_impl = gen.func_impl(item["prompt"], model, "simple")
@@ -214,7 +215,7 @@ def run_mcts(
                             item["solution"] = child.solution
                             is_solved = True
                             reward_real = 1
-                            break
+                        break
 
                 if is_solved:
                     break

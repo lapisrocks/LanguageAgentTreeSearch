@@ -100,18 +100,9 @@ class Node:
 
     def uct(self):
         if self.visits == 0:
-            return float('inf')
-            #return self.value * 2
+            return self.value
         return self.value / self.visits + np.sqrt(2 * np.log(self.parent.visits) / self.visits)
     
-    def uct_with_depth(self, C1=1, C2=1):
-        if self.visits == 0:
-            return float('inf')
-        exploitation_term = self.value / self.visits
-        exploration_term = np.sqrt(2 * np.log(self.parent.visits) / self.visits)
-        depth_term = self.depth
-        return exploitation_term + C1 * exploration_term + C2 * depth_term
-
     def __str__(self):
         return f"Node(depth={self.depth}, value={self.value:.2f}, visits={self.visits}, thought={self.state['thought']}, action={self.state['action']}, observation={self.state['observation']})"
     
@@ -165,7 +156,7 @@ def collect_trajectory(node):
         node = node.parent
     return '\n'.join(reversed(trajectory))
 
-def lats_search(args, task, idx, iterations=50, to_print=True):
+def lats_search(args, task, idx, iterations=30, to_print=True):
     global gpt
     global failed_trajectories
     global reflection_map
@@ -205,7 +196,7 @@ def lats_search(args, task, idx, iterations=50, to_print=True):
 
         value = evaluate_node(node, args, task)
         # Find the child with the highest value
-        reward, terminal_node = rollout(max(node.children, key=lambda child: child.value), args, task, idx, max_depth=7)
+        reward, terminal_node = rollout(max(node.children, key=lambda child: child.value), args, task, idx, max_depth=4)
 
         terminal_nodes.append(terminal_node)
 
@@ -277,7 +268,7 @@ def expand_node(node, args, task):
     new_nodes = generate_new_states(node, args, task, args.n_generate_sample)
     node.children.extend(new_nodes)
 
-def rollout(node, args, task, idx, max_depth=7):
+def rollout(node, args, task, idx, max_depth=4):
     logging.info("ROLLING OUT")
     depth = node.depth
     n = 5
