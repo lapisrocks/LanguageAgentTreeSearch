@@ -26,7 +26,7 @@ While large language models (LLMs) have demonstrated impressive performance on a
 | ReAct                     | 0.32                                              | 56.9                                           | 53.8                                          |
 | ToT                       | 0.55                                               | 54.4                                           | N/A (cannot act)                                           |
 | Reflexion                 | 0.51                                               | 68.1                                           | 64.2                                          |
-| LATS                      | 0.71                                               | 86.9                                           | 75.9                                          |
+| LATS                      | 0.71                                               | 83.8                                           | 75.9                                          |
 
 
 With GPT-3.5, LATS outperforms ReAct, Reflexion, CoT, ToT, and RAP across a variety of tasks, including programming and web-browsing.
