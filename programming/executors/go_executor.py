@@ -1,99 +1,361 @@
-import ast
+import os
 import signal
-import astunparse
+import subprocess
 
-from .executor_utils import function_with_timeout
-
-from typing import List
+from .executor_utils import timeout_handler
 from .executor_types import ExecuteResult, Executor
 
+from typing import List, Tuple, Optional
+import re
+
+
+def create_temp_project() -> Tuple[str, str]:
+    # get id of the process
+    pid = os.getpid()
+    # get random number
+    rand = os.urandom(8).hex()
+    # create a temp directory
+    temp_dir = f"/tmp/go-{pid}-{rand}"
+    # delete the temp directory if it exists
+    if os.path.exists(temp_dir):
+        os.system(f"rm -rf {temp_dir}")
+    os.mkdir(temp_dir)
+    # initialize a go project
+    os.chdir(temp_dir)
+    os.system(f"go mod init go-{pid}-{rand}")
+    main_path = os.path.join(temp_dir, "main.go")
+    test_path = os.path.join(temp_dir, "main_test.go")
+    return temp_dir, main_path, test_path
+
+
+def write_to_file(path: str, code: str, package: str = "main", funcName: str = "main"):
+    prelude = f"package {package}\n\nfunc {funcName}() {{\n"
+    postlude = "\n}"
+    code = prelude + code + postlude
+    # delete the file if it exists
+    if os.path.exists(path):
+        os.remove(path)
+    # write the code to the file
+    with open(path, "w") as f:
+        f.write(code)
+
+
+def format_files(paths: List[str]):
+    for path in paths:
+        os.system(f"go fmt {path}")
+        os.system(f"goimports -w {path}")
+
+
+def download_imports(tmp_cargo_path: str):
+    os.system(f"cd {tmp_cargo_path} && go get -d ./... && go mod tidy")
+
+
+def write_to_file_toplevel(path: str, code: str):
+    # delete the file if it exists
+    if os.path.exists(path):
+        os.remove(path)
+    # write the code to the file
+    with open(path, "w") as f:
+        f.write(code)
+
+
+def run_with_timeout(cmd: str, tmp_cargo_path: str, timeout: int = 5, print_debug: bool = False) -> Optional[Tuple[str, str]]:
+    """
+    Runs the given command with a timeout. Produces a tuple of stdout and stderr.
+    If the command times out, returns None.
+    """
+    # set up the timeout handler
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)
+
+    # run the command
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, cwd=tmp_cargo_path)
+    try:
+        out, err = p.communicate()
+        # reset the timeout handler
+        signal.alarm(0)
+    except TimeoutError:
+        p.kill()
+        return None
+
+    # decode the output
+    out = out.decode("utf-8")
+    err = err.decode("utf-8")
+    if print_debug:
+        print("## RUN OUTPUTS ##")
+        print("STDOUT:")
+        print(out)
+        print("STDERR:")
+        print(err, flush=True)
+
+    return out, err
+
+
 class GoExecutor(Executor):
-    # TODO: implement this
     def execute(self, func: str, tests: List[str], timeout: int = 5) -> ExecuteResult:
         # Combine function code and assert statement
-        imports = 'from typing import *'
-        func_test_list = [f'{imports}\n{func}\n{test}' for test in tests]
+        func_test_list = [f'{func}\n{test}' for test in tests]
+
+        tmp_dir, temp_file, temp_test = create_temp_project()
+
+        # run go get to download the dependencies
+        write_to_file(temp_file, func, "main", "main")
+        format_files([temp_file])
+        download_imports(tmp_dir)
+
+        res = run_with_timeout(
+            "go build ./...", tmp_dir, timeout=timeout)
+        assert res is not None, "Timeout in go get"
+
+        errs = grab_compile_errs(res[0])  # (check returns stdin)
+        if len(errs) > 0:
+            # cleanup the temp directory
+            os.system(f"rm -rf {tmp_dir}")
+            state = tuple([False] * len(tests))
+
+            err_str = ""
+            for err in errs:
+                err_str += f"\n{err}"
+
+            return ExecuteResult(False, err_str, state)
 
         # Run the tests and collect the results
-        success_tests = []
-        failed_tests = []
-        is_passing = True
+        tests_res: List[Tuple[bool, str]] = []
         num_tests = len(func_test_list)
         for i in range(num_tests):
-            try:
+            """
+            # use some sort of timeout limit to handle infinite loops
+            if pass, add to success tests
+            if fail, add to failed tests with the log from the compiler
+            """
+            write_to_file(temp_test, func_test_list[i], "main", "main_test")
+            format_files([temp_test])
+            download_imports(tmp_dir)
 
-                function_with_timeout(exec, (func_test_list[i], globals()), timeout)
+            # run go test
+            res = run_with_timeout("go test ./...", tmp_dir, timeout=timeout)
+            if res is None:
+                tests_res.append((False, "Timeout"))
+                continue
 
-                success_tests += [tests[i]]
-            except Exception:
-                output = get_output(func, tests[i], timeout=timeout)
-                failed_tests += [f"{tests[i]} # output: {output}"]
-                is_passing = False
+            # check if we have any failed tests
+            errs = grab_test_errs(res[1])
+            if len(errs) > 0:
+                tests_res.append((False, str(errs[0])))
+                continue
 
+            # if we get here, the test passed
+            tests_res.append((True, ""))
+
+        # cleanup the temp directory
+        os.system(f"rm -rf {tmp_dir}")
+
+        passed_str = ""
+        failed_str = ""
         state = []
-        for test in tests:
-            if test in success_tests:
-                state += [True]
+        for i, (passed, output) in enumerate(tests_res):
+            test = tests[i]
+            if passed:
+                passed_str += f"\n{test}"
             else:
-                state += [False]
-
-        state = tuple(state)
+                failed_str += f"\n{test} // output: {output}"
+            state.append(passed)
 
         feedback = "Tested passed:"
-        for test in success_tests:
-            feedback += f"\n{test}"
+        feedback += passed_str
         feedback += "\n\nTests failed:"
-        for test in failed_tests:
-            feedback += f"\n{test}"
-            
-        return ExecuteResult(is_passing, feedback, state)
+        feedback += failed_str
 
-    # TODO: implement this
+        is_passing = len(failed_str) == 0
+
+        return ExecuteResult(is_passing, feedback, tuple(state))
+
     def evaluate(self, name: str, func: str, test: str, timeout: int = 5) -> bool:
         """
-        Evaluates the implementation on Human-Eval Python.
+        Evaluates the implementation on Human-Eval Rust (MultiPL-E generated,
 
-        probably should be written in a dataset-agnostic way but not now
+        Federico Cassano, John Gouwar, Daniel Nguyen, Sydney Nguyen, Luna Phipps-Costin, Donald Pinckney, Ming-Ho Yee, Yangtian Zi, Carolyn Jane Anderson, Molly Q Feldman, Arjun Guha, Michael Greenberg, Abhinav Jangda ).
+        If you use this function please cite:
+        @misc{cassano2022multiple,
+          title={MultiPL-E: A Scalable and Extensible Approach to Benchmarking Neural Code Generation}, 
+          author={Federico Cassano and John Gouwar and Daniel Nguyen and Sydney Nguyen and Luna Phipps-Costin and Donald Pinckney and Ming-Ho Yee and Yangtian Zi and Carolyn Jane Anderson and Molly Q Feldman and Arjun Guha and Michael Greenberg and Abhinav Jangda},
+          year={2022},
+          eprint={2208.08227},
+          archivePrefix={arXiv},
+          primaryClass={cs.LG}
+        })
+
+        TODO: do it actually
         """
-        code = f"""{func}
+        tmp_dir, tmp_path = create_temp_project()
+        print(f"Evaluating\n{func + test}", flush=True)
+        write_to_file_toplevel(tmp_path, func + test)
 
-{test}
+        res = run_with_timeout(
+            "go build ./...", tmp_dir, timeout=timeout, print_debug=True)
+        assert res is not None, "Timeout building the project"
 
-check({name})
-    """
-        try:
-
-            function_with_timeout(exec, (code, globals()), timeout)
-
-            return True
-        except Exception:
+        errs = grab_compile_errs(res[0])  # (check returns stdin)
+        if len(errs) > 0:
+            # cleanup the temp directory
+            os.system(f"rm -rf {tmp_dir}")
+            print("Compile errors. Failed eval", flush=True)
             return False
 
-# TODO: implement this
-def get_call_str(assert_statement: str) -> str:
-    ast_parsed = ast.parse(assert_statement)
-    try:
-        call_str = ast_parsed.body[0].test.left # type: ignore
-    except:
-        call_str = ast_parsed.body[0].test # type: ignore
+        # compile and run the binary
+        res = run_with_timeout("go run ./main.go", tmp_dir,
+                               timeout=timeout, print_debug=True)
+        os.system(f"rm -rf {tmp_dir}")
 
-    return astunparse.unparse(call_str).strip()
+        if res is None:
+            print("Timeout?. Failed eval", flush=True)
+            return False
+        else:
+            errs = grab_test_errs(res[1])
+            if len(errs) > 0:
+                print("Runtime errors. Failed eval", flush=True)
+                return False
 
-# TODO: implement this
-def get_output(func: str, assert_statement: str, timeout: int = 5) -> str:
-    try:
-        exec(f"from typing import *\n{func}", globals())
-        func_call = get_call_str(assert_statement)
-        output = function_with_timeout(eval, (func_call, globals()), timeout)
-        return output
-    except TimeoutError:
-        return "TIMEOUT"
-    except Exception as e:
-        return str(e)
+            print("Passed eval", flush=True)
+            return len(errs) == 0
+
+
+assert_no_panic = r"""
+macro_rules! assert_eq_nopanic {
+    ($left:expr, $right:expr) => {
+        std::panic::catch_unwind(|| {
+            assert_eq!($left, $right);
+        }).unwrap_or_else(|_| {});
+    };
+    () => {};
+}
+"""
+
+
+def transform_asserts(code: str) -> str:
+    """
+    Transform all asserts into assert_eq_nopanic! asserts, inserting the macro
+    definition at the top of the code.
+    """
+    code.replace("assert_eq!", "assert_eq_nopanic!")
+    return assert_no_panic + code
+
+
+def revert_asserts(code: str) -> str:
+    """
+    Revert all assert_eq_nopanic! asserts back into assert_eq! asserts.
+    """
+    normal = code.replace("assert_eq_nopanic!", "assert_eq!")
+    # remove the macro definition
+    return normal[len(assert_no_panic):]
+
+
+class CompileErr:
+    def __init__(self, rendered):
+        self.rendered = rendered
+
+    def __str__(self):
+        return self.rendered
+
+    def __repr__(self):
+        return "{" + str(self) + "}"
+
+
+class RuntimeErr:
+    def __init__(self, left, right, line, column, panic_reason):
+        # right and left are only used for assert_eq! errors
+        self.left = left
+        self.right = right
+        # NOTE: currently not using the below
+        self.line = line
+        self.column = column
+        self.panic_reason = panic_reason
+
+    def __str__(self):
+        if self.left is not None and self.right is not None:
+            return f"assertion failed: {self.left} == {self.right}"
+        else:
+            return self.panic_reason
+
+    def __repr__(self):
+        return "{" + str(self) + "}"
+
+
+# assumes that the input is the stdout of cargo check --message-format=json
+# returns a list of compile errors as CompileErr objects
+def grab_compile_errs(inp: str) -> List[CompileErr]:
+    # we get a stream of json objects, so we need to parse them one by one
+    objs = []
+    compileErr = ""
+    for line in inp.splitlines():
+        if line == "":
+            continue
+        if line.startswith("#"):
+            continue
+        if line.startswith("        "):
+            compileErr += line.strip() + "\n"
+        if compileErr != "":
+            objs.append(CompileErr(compileErr))
+
+    return objs
+
+# assumes that the given input is the stderr of cargo run.
+# returns a list of failed assertions as RuntimeErr objects
+
+
+def grab_test_errs(inp: str) -> List[RuntimeErr]:
+    failed_asserts = []
+    for line in inp.splitlines():
+        if line.startswith("        main_test.go"):
+            pattern = r"^(.+):(\d+): (.+) want (.+)$"
+
+            match = re.match(pattern, line.trim())
+            if match:
+                line = match.group(2)
+                curr_left = match.group(3)
+                curr_right = match.group(4)
+            failed_asserts.append(RuntimeErr(
+                curr_left, curr_right, line, None, f"Got {curr_left}, want {curr_right}"))
+
+    return failed_asserts
+
 
 if __name__ == "__main__":
-    pass
-    # Test the function
-    func = "def add(a, b):\n    while True:\n        x = 1\n    return a + b"
-    tests = ["assert add(1, 2) == 3", "assert add(1, 2) == 4"]
-    print(PyExecutor().execute(func, tests, timeout=1))
+    test_runtime = r"""
+?       github.com/example-project/examples/converter/basic-conversion-1/output [no test files]
+?       github.com/example-project/examples/converter/basic-conversion-2/input  [no test files]
+?       github.com/example-project/examples/converter/basic-conversion-2/output [no test files]
+?       github.com/example-project/examples/converter/basic-conversion-3/input  [no test files]
+?       github.com/example-project/examples/converter/basic-conversion-3/output [no test files]
+?       github.com/example-project/examples/storage       [no test files]
+?       github.com/example-project/examples/test-inputs/basic-input-1     [no test files]
+Got: &{Hello World!}Got: &{Hello Ana!}--- FAIL: TestHandleRequest (0.00s)
+    --- FAIL: TestHandleRequest/Test_2 (0.00s)
+        main_test.go:49: HandleRequest() = &{Hello Ana!}, want &{Hello World!}
+FAIL
+FAIL    github.com/example-project/examples/converter/basic-conversion-1/input  3.922s
+FAIL
+    """
+
+    # test input
+    test_compiletime = r"""
+# command-line-arguments
+examples\\converter\basic-conversion-1\\input\\main.go:5:2: "log" imported and not used
+examples\\converter\basic-conversion-1\\input\\main.go:20:15: undefined: fmt
+examples\\converter\basic-conversion-1\\input\\main.go:22:13: undefined: fmt
+examples\\converter\basic-conversion-1\\input\\main.go:23:9: not enough return values
+        have (MyResponse)
+        want (*MyResponse, error)
+examples\\converter\basic-conversion-1\\input\\main.go:27:2: not enough arguments in call to lambda.Start
+        have ()
+        want (interface{})
+    """
+
+    compile_errs = grab_compile_errs(test_compiletime)
+    print(compile_errs)
+    assert(len(compile_errs) == 1)
+
+    test_errs = grab_test_errs(test_runtime)
+    print(test_errs)
+    assert(len(test_errs) == 1)
