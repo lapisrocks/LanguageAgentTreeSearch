@@ -13,10 +13,10 @@ def generic_generate_func_impl(
     self_reflection,
     num_comps,
     temperature,
-    reflexion_chat_instruction: str,
-    reflexion_few_shot: str,
+    reflection_chat_instruction: str,
+    reflection_few_shot: str,
     simple_chat_instruction: str,
-    reflexion_completion_instruction: str,
+    reflection_completion_instruction: str,
     simple_completion_instruction: str,
     code_block_instruction: str,
     parse_code_block: Callable[[str], str],
@@ -31,8 +31,8 @@ def generic_generate_func_impl(
 
     if model.is_chat:
         if strategy == "reflexion":
-            message = f"{reflexion_few_shot}\n[previous impl]:\n{add_code_block(prev_func_impl)}\n\n[unit test results from previous impl]:\n{feedback}\n\n[reflection on previous impl]:\n{self_reflection}\n\n[improved impl]:\n{func_sig}"
-            prompt = f"{reflexion_chat_instruction}\n{code_block_instruction}"
+            message = f"{reflection_few_shot}\n[previous impl]:\n{add_code_block(prev_func_impl)}\n\n[unit test results from previous impl]:\n{feedback}\n\n[reflection on previous impl]:\n{self_reflection}\n\n[improved impl]:\n{func_sig}"
+            prompt = f"{reflection_chat_instruction}\n{code_block_instruction}"
             # func_bodies is a really bad name, as it can also be just 1 string
             print_messages(prompt, message)
             messages = [
@@ -42,7 +42,7 @@ def generic_generate_func_impl(
                 ),
                 Message(
                     role="user", # TODO: check this
-                    content=reflexion_few_shot,
+                    content=reflection_few_shot,
                 ),
                 Message(
                     role="assistant",
@@ -78,7 +78,7 @@ def generic_generate_func_impl(
             func_bodies = model.generate_chat(messages=messages, num_comps=num_comps, temperature=temperature)
     else:
         if strategy == "reflexion":
-            prompt = f"{reflexion_completion_instruction}\n{add_code_block(prev_func_impl)}\n\nunit tests:\n{feedback}\n\nhint:\n{self_reflection}\n\n# improved implementation\n{func_sig}\n{code_block_instruction}"
+            prompt = f"{reflection_completion_instruction}\n{add_code_block(prev_func_impl)}\n\nunit tests:\n{feedback}\n\nhint:\n{self_reflection}\n\n# improved implementation\n{func_sig}\n{code_block_instruction}"
             func_bodies = model.generate(
                 prompt, num_comps=num_comps, temperature=temperature)
         else:
@@ -107,10 +107,10 @@ def generate_with_accumulated_context(
     accumulated_reflection,
     num_comps,
     temperature,
-    reflexion_chat_instruction: str,
-    reflexion_few_shot: str,
+    reflection_chat_instruction: str,
+    reflection_few_shot: str,
     simple_chat_instruction: str,
-    reflexion_completion_instruction: str,
+    reflection_completion_instruction: str,
     simple_completion_instruction: str,
     code_block_instruction: str,
     parse_code_block: Callable[[str], str],
@@ -134,8 +134,8 @@ def generate_with_accumulated_context(
         if strategy == "reflexion":
             # Constructing the message using a loop for accumulated context
             messages = [
-                Message(role="system", content=f"{reflexion_chat_instruction}\n{code_block_instruction}"),
-                Message(role="user", content=reflexion_few_shot)
+                Message(role="system", content=f"{reflection_chat_instruction}\n{code_block_instruction}"),
+                Message(role="user", content=reflection_few_shot)
             ]
             
             for impl, feedback, reflection in zip(prev_func_impl, accumulated_feedback, accumulated_reflection):
@@ -144,7 +144,7 @@ def generate_with_accumulated_context(
             
             messages.append(Message(role="user", content=f"[improved impl]:\n{func_sig}"))
             prompt = "\n".join([message.content for message in messages])
-            message = (f"{reflexion_few_shot}\n{accumulated_context}\n\n[improved impl]:\n{func_sig}")
+            message = (f"{reflection_few_shot}\n{accumulated_context}\n\n[improved impl]:\n{func_sig}")
             print_messages(prompt, message)
 
             func_bodies = model.generate_chat(messages=messages, num_comps=num_comps, temperature=temperature)
@@ -158,7 +158,7 @@ def generate_with_accumulated_context(
             func_bodies = model.generate_chat(messages=messages, num_comps=num_comps, temperature=temperature)
     else:
         if strategy == "reflexion":
-            prompt = f"{reflexion_completion_instruction}\n{accumulated_context}\n\n# improved implementation\n{func_sig}\n{code_block_instruction}"
+            prompt = f"{reflection_completion_instruction}\n{accumulated_context}\n\n# improved implementation\n{func_sig}\n{code_block_instruction}"
             func_bodies = model.generate(prompt, num_comps=num_comps, temperature=temperature)
             print_messages(prompt, "")  
         else:

@@ -1,6 +1,7 @@
 import os
 import signal
 import subprocess
+import tempfile
 
 from .executor_utils import timeout_handler
 from .executor_types import ExecuteResult, Executor
@@ -15,22 +16,23 @@ def create_temp_project() -> Tuple[str, str]:
     # get random number
     rand = os.urandom(8).hex()
     # create a temp directory
-    temp_dir = f"/tmp/go-{pid}-{rand}"
+    temp_path = tempfile.gettempdir()
+    temp_dir = f"{temp_path}/go-lats-{pid}-{rand}"
     # delete the temp directory if it exists
     if os.path.exists(temp_dir):
         os.system(f"rm -rf {temp_dir}")
     os.mkdir(temp_dir)
     # initialize a go project
     os.chdir(temp_dir)
-    os.system(f"go mod init go-{pid}-{rand}")
-    main_path = os.path.join(temp_dir, "main.go")
-    test_path = os.path.join(temp_dir, "main_test.go")
+    os.system(f"go mod init go-lats-{pid}-{rand}")
+    main_path = os.path.join(temp_dir, "lats.go")
+    test_path = os.path.join(temp_dir, "lats_test.go")
     return temp_dir, main_path, test_path
 
 
-def write_to_file(path: str, code: str, package: str = "main", funcName: str = "main"):
-    prelude = f"package {package}\n\nfunc {funcName}() {{\n"
-    postlude = "\n}"
+def write_to_file(path: str, code: str, package: str = "main"):
+    prelude = f"package {package}\n\n"
+    postlude = ""
     code = prelude + code + postlude
     # delete the file if it exists
     if os.path.exists(path):
@@ -59,25 +61,14 @@ def write_to_file_toplevel(path: str, code: str):
         f.write(code)
 
 
-def run_with_timeout(cmd: str, tmp_cargo_path: str, timeout: int = 5, print_debug: bool = False) -> Optional[Tuple[str, str]]:
+def run_process(cmd: str, tmp_path: str, timeout: int = 5, print_debug: bool = False) -> Optional[Tuple[str, str]]:
     """
-    Runs the given command with a timeout. Produces a tuple of stdout and stderr.
-    If the command times out, returns None.
+    Runs the given command. Produces a tuple of stdout and stderr.
     """
-    # set up the timeout handler
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(timeout)
-
     # run the command
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE, cwd=tmp_cargo_path)
-    try:
-        out, err = p.communicate()
-        # reset the timeout handler
-        signal.alarm(0)
-    except TimeoutError:
-        p.kill()
-        return None
+                         stderr=subprocess.PIPE, cwd=tmp_path)
+    out, err = p.communicate()
 
     # decode the output
     out = out.decode("utf-8")
@@ -95,20 +86,18 @@ def run_with_timeout(cmd: str, tmp_cargo_path: str, timeout: int = 5, print_debu
 class GoExecutor(Executor):
     def execute(self, func: str, tests: List[str], timeout: int = 5) -> ExecuteResult:
         # Combine function code and assert statement
-        func_test_list = [f'{func}\n{test}' for test in tests]
-
         tmp_dir, temp_file, temp_test = create_temp_project()
 
         # run go get to download the dependencies
-        write_to_file(temp_file, func, "main", "main")
+        write_to_file(temp_file, func, "lats")
         format_files([temp_file])
         download_imports(tmp_dir)
 
-        res = run_with_timeout(
+        res = run_process(
             "go build ./...", tmp_dir, timeout=timeout)
         assert res is not None, "Timeout in go get"
 
-        errs = grab_compile_errs(res[0])  # (check returns stdin)
+        errs = grab_compile_errs(res[1])  # (check returns stdin)
         if len(errs) > 0:
             # cleanup the temp directory
             os.system(f"rm -rf {tmp_dir}")
@@ -122,19 +111,19 @@ class GoExecutor(Executor):
 
         # Run the tests and collect the results
         tests_res: List[Tuple[bool, str]] = []
-        num_tests = len(func_test_list)
+        num_tests = len(tests)
         for i in range(num_tests):
             """
             # use some sort of timeout limit to handle infinite loops
             if pass, add to success tests
             if fail, add to failed tests with the log from the compiler
             """
-            write_to_file(temp_test, func_test_list[i], "main", "main_test")
+            write_to_file(temp_test, tests[i], "lats")
             format_files([temp_test])
             download_imports(tmp_dir)
 
             # run go test
-            res = run_with_timeout("go test ./...", tmp_dir, timeout=timeout)
+            res = run_process("go test ./...", tmp_dir, timeout=timeout)
             if res is None:
                 tests_res.append((False, "Timeout"))
                 continue
@@ -192,7 +181,7 @@ class GoExecutor(Executor):
         print(f"Evaluating\n{func + test}", flush=True)
         write_to_file_toplevel(tmp_path, func + test)
 
-        res = run_with_timeout(
+        res = run_process(
             "go build ./...", tmp_dir, timeout=timeout, print_debug=True)
         assert res is not None, "Timeout building the project"
 
@@ -204,7 +193,7 @@ class GoExecutor(Executor):
             return False
 
         # compile and run the binary
-        res = run_with_timeout("go run ./main.go", tmp_dir,
+        res = run_process("go run ./main.go", tmp_dir,
                                timeout=timeout, print_debug=True)
         os.system(f"rm -rf {tmp_dir}")
 
