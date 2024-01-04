@@ -208,11 +208,11 @@ def generic_generate_internal_tests(
             messages = [
                 Message(
                     role="system",
-                    content=test_generation_chat_instruction,
+                    content=f"{test_generation_chat_instruction}\n\n{test_generation_few_shot}",
                 ),
                 Message(
                     role="user",
-                    content=f"{test_generation_few_shot}\n\n[func signature]:\n{func_sig}\n\n[unit tests]:",
+                    content=f"[func signature]:\n{func_sig}\n\n[unit tests]:",
                 )
             ]
             output = model.generate_chat(messages=messages, max_tokens=1024)

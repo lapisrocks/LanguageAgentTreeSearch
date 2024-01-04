@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional
 import re
 
 
-def create_temp_project() -> Tuple[str, str]:
+def create_temp_project() -> Tuple[str, str, str]:
     # get id of the process
     pid = os.getpid()
     # get random number
@@ -58,7 +58,7 @@ def write_to_file_toplevel(path: str, code: str):
         os.remove(path)
     # write the code to the file
     with open(path, "w") as f:
-        f.write(code)
+        f.write(f"package lats\n\n{code}")
 
 
 def run_process(cmd: str, tmp_path: str, timeout: int = 5, print_debug: bool = False) -> Optional[Tuple[str, str]]:
@@ -128,8 +128,15 @@ class GoExecutor(Executor):
                 tests_res.append((False, "Timeout"))
                 continue
 
+            # check if we have any compile errors in the test
+            errs = grab_compile_errs(res[1])  # (check returns stdin)
+            if len(errs) > 0:
+                # cleanup the temp directory
+                tests_res.append((False, str(errs[1])))
+                continue
+
             # check if we have any failed tests
-            errs = grab_test_errs(res[1])
+            errs = grab_test_errs(res[0])
             if len(errs) > 0:
                 tests_res.append((False, str(errs[0])))
                 continue
@@ -177,9 +184,12 @@ class GoExecutor(Executor):
 
         TODO: do it actually
         """
-        tmp_dir, tmp_path = create_temp_project()
-        print(f"Evaluating\n{func + test}", flush=True)
-        write_to_file_toplevel(tmp_path, func + test)
+        tmp_dir, tmp_path, test_path = create_temp_project()
+        print(f"Evaluating\n{func}\n\n{test}", flush=True)
+        write_to_file_toplevel(tmp_path, func)
+        write_to_file_toplevel(test_path, test)
+        format_files([tmp_path, test_path])
+        download_imports(tmp_dir)
 
         res = run_process(
             "go build ./...", tmp_dir, timeout=timeout, print_debug=True)
@@ -193,7 +203,7 @@ class GoExecutor(Executor):
             return False
 
         # compile and run the binary
-        res = run_process("go run ./main.go", tmp_dir,
+        res = run_process("go test ./...", tmp_dir,
                                timeout=timeout, print_debug=True)
         os.system(f"rm -rf {tmp_dir}")
 
@@ -201,9 +211,14 @@ class GoExecutor(Executor):
             print("Timeout?. Failed eval", flush=True)
             return False
         else:
-            errs = grab_test_errs(res[1])
+            # check if we have any compile errors in the test
+            errs = grab_compile_errs(res[1])  # (check returns stdin)
             if len(errs) > 0:
-                print("Runtime errors. Failed eval", flush=True)
+                print("Compile errors. Failed eval", flush=True)
+                return False
+            errs = grab_test_errs(res[0])
+            if len(errs) > 0:
+                print("Test errors. Failed eval", flush=True)
                 return False
 
             print("Passed eval", flush=True)
@@ -296,16 +311,15 @@ def grab_compile_errs(inp: str) -> List[CompileErr]:
 def grab_test_errs(inp: str) -> List[RuntimeErr]:
     failed_asserts = []
     for line in inp.splitlines():
-        if line.startswith("        main_test.go"):
-            pattern = r"^(.+):(\d+): (.+) want (.+)$"
+        if line.startswith("        lats_test.go"):
+            pattern = r"^(?:.+):(\d+): (.+)$"
 
-            match = re.match(pattern, line.trim())
+            match = re.match(pattern, line.strip())
             if match:
-                line = match.group(2)
-                curr_left = match.group(3)
-                curr_right = match.group(4)
+                lineNo = match.group(1)
+                panicReason = match.group(2)
             failed_asserts.append(RuntimeErr(
-                curr_left, curr_right, line, None, f"Got {curr_left}, want {curr_right}"))
+                None, None, lineNo, None, panicReason))
 
     return failed_asserts
 
@@ -321,7 +335,7 @@ if __name__ == "__main__":
 ?       github.com/example-project/examples/test-inputs/basic-input-1     [no test files]
 Got: &{Hello World!}Got: &{Hello Ana!}--- FAIL: TestHandleRequest (0.00s)
     --- FAIL: TestHandleRequest/Test_2 (0.00s)
-        main_test.go:49: HandleRequest() = &{Hello Ana!}, want &{Hello World!}
+        lats_test.go:49: HandleRequest() = &{Hello Ana!}, want &{Hello World!}
 FAIL
 FAIL    github.com/example-project/examples/converter/basic-conversion-1/input  3.922s
 FAIL

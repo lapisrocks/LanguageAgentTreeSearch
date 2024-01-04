@@ -1,3 +1,4 @@
+import re
 from generators.model import ModelBase
 from .generator_types import Generator
 from .generator_utils import generic_generate_func_impl, generic_generate_internal_tests, generic_generate_self_reflection, generate_with_accumulated_context
@@ -212,7 +213,11 @@ class GoGenerator(Generator):
             max_num_tests: int = 5
     ) -> List[str]:
         def parse_tests(tests: str) -> List[str]:
-            return [test + ";" for test in tests.split(";")]
+            pattern = r"(func Test\w+\(t \*testing\.T\) \{\n.+\n\})"
+            matches = re.findall(pattern, tests, re.DOTALL)
+            return matches
+        def is_syntax_valid(test: str) -> bool:
+            return True # TODO: implement this
         """
         Generates tests for a function.
         """
@@ -224,5 +229,5 @@ class GoGenerator(Generator):
             test_generation_chat_instruction=GO_TEST_GENERATION_CHAT_INSTRUCTION,
             test_generation_completion_instruction=GO_TEST_GENERATION_COMPLETION_INSTRUCTION,
             parse_tests=parse_tests,
-            is_syntax_valid=(lambda x: True)  # TODO: for now. typecheck maybe?
+            is_syntax_valid=is_syntax_valid
         )
