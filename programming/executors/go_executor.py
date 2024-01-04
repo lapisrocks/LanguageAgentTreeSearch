@@ -1,10 +1,8 @@
 import os
-import signal
 import subprocess
 import tempfile
 
-from .executor_utils import timeout_handler
-from .executor_types import ExecuteResult, Executor
+from executor_types import ExecuteResult, Executor
 
 from typing import List, Tuple, Optional
 import re
@@ -297,10 +295,15 @@ def grab_compile_errs(inp: str) -> List[CompileErr]:
             continue
         if line.startswith("#"):
             continue
+        if line.startswith(".\\lats.go"):
+            if compileErr != "":
+                objs.append(CompileErr(compileErr))
+            compileErr = line.strip() + "\n"
         if line.startswith("        "):
             compileErr += line.strip() + "\n"
-        if compileErr != "":
-            objs.append(CompileErr(compileErr))
+    
+    if compileErr != "":
+        objs.append(CompileErr(compileErr))
 
     return objs
 
@@ -325,40 +328,34 @@ def grab_test_errs(inp: str) -> List[RuntimeErr]:
 
 
 if __name__ == "__main__":
-    test_runtime = r"""
-?       github.com/example-project/examples/converter/basic-conversion-1/output [no test files]
-?       github.com/example-project/examples/converter/basic-conversion-2/input  [no test files]
-?       github.com/example-project/examples/converter/basic-conversion-2/output [no test files]
-?       github.com/example-project/examples/converter/basic-conversion-3/input  [no test files]
-?       github.com/example-project/examples/converter/basic-conversion-3/output [no test files]
-?       github.com/example-project/examples/storage       [no test files]
-?       github.com/example-project/examples/test-inputs/basic-input-1     [no test files]
-Got: &{Hello World!}Got: &{Hello Ana!}--- FAIL: TestHandleRequest (0.00s)
-    --- FAIL: TestHandleRequest/Test_2 (0.00s)
-        lats_test.go:49: HandleRequest() = &{Hello Ana!}, want &{Hello World!}
-FAIL
-FAIL    github.com/example-project/examples/converter/basic-conversion-1/input  3.922s
-FAIL
-    """
 
-    # test input
     test_compiletime = r"""
-# command-line-arguments
-examples\\converter\basic-conversion-1\\input\\main.go:5:2: "log" imported and not used
-examples\\converter\basic-conversion-1\\input\\main.go:20:15: undefined: fmt
-examples\\converter\basic-conversion-1\\input\\main.go:22:13: undefined: fmt
-examples\\converter\basic-conversion-1\\input\\main.go:23:9: not enough return values
-        have (MyResponse)
-        want (*MyResponse, error)
-examples\\converter\basic-conversion-1\\input\\main.go:27:2: not enough arguments in call to lambda.Start
-        have ()
-        want (interface{})
+# go-lats-35116-6739b2903daabf6d
+.\lats.go:10:7: undefined: math
+.\lats.go:11:18: too many return values
+        have (bool, bool)
+        want (bool)
+.\lats.go:15:16: too many return values
+        have (bool, bool)
+        want (bool)
     """
 
     compile_errs = grab_compile_errs(test_compiletime)
     print(compile_errs)
-    assert(len(compile_errs) == 1)
+    assert(len(compile_errs) == 3)
+
+
+    test_runtime = r"""
+--- FAIL: TestHasCloseElements (0.00s)
+    --- FAIL: TestHasCloseElements/all_elements_equal (0.00s)
+        lats_test.go:53: HasCloseElements() = false, want true
+    --- FAIL: TestHasCloseElements/negative_threshold (0.00s)
+        lats_test.go:53: HasCloseElements() = false, want true
+FAIL
+FAIL    go-lats-35116-6739b2903daabf6d  2.672s
+FAIL
+    """
 
     test_errs = grab_test_errs(test_runtime)
     print(test_errs)
-    assert(len(test_errs) == 1)
+    assert(len(test_errs) == 2)
