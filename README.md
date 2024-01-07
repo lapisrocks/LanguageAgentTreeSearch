@@ -71,7 +71,7 @@ export OPENAI_API_KEY=<your key>
 
 4. Set the scripts and run paper experiments
 ```bash
-sh run_lats.sh
+sh lats.sh
 ```
 
 Code adapted from https://github.com/noahshinn024/reflexion/tree/main
