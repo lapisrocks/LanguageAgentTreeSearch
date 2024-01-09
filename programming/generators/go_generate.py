@@ -7,16 +7,13 @@ from .parse import parse_code_block, add_code_block
 from typing import List, Optional, Union
 
 GO_SIMPLE_COMPLETION_INSTRUCTION = "// Write the body of this function only."
-GO_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go writing assistant. You will be given your past function implementation, a series of unit tests, and a hint to change the implementation appropriately. Write your full implementation (restate the function signature).\n\n-----"
-GO_SELF_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go writing assistant. You will be given a function implementation and a series of unit tests. Your goal is to write a few sentences to explain why your implementation is wrong as indicated by the tests. You will need this as a hint when you try again later. Only provide the few sentence description in your answer, not the implementation.\n\n-----"
+GO_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go programming assistant. You will be given your past function implementation, a series of unit tests, and a hint to change the implementation appropriately. Apply the changes below by writing the body of this function only.\n\n-----"
+GO_SELF_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go programming assistant. You will be given a function implementation and a series of unit tests. Your goal is to write a few sentences to explain why your implementation is wrong as indicated by the tests. You will need this as a hint when you try again later. Only provide the few sentence description in your answer, not the implementation.\n\n-----"
 USE_GO_CODEBLOCK_INSTRUCTION = "Use a Go code block to write your response. For example:\n```go\nfunc main() {\n    fmt.Println(\"Hello, World!\")\n}\n```"
 
 GO_SIMPLE_CHAT_INSTRUCTION = "You are an AI that only responds with Go code, NOT ENGLISH. You will be given a function signature and its docstring by the user. Write your full implementation (restate the function signature)."
 GO_REFLECTION_CHAT_INSTRUCTION = "You are an AI Go assistant. You will be given your past function implementation, a series of unit tests, and a hint to change the implementation appropriately. Write your full implementation (restate the function signature)."
 GO_SELF_REFLECTION_CHAT_INSTRUCTION = "You are a Go programming assistant. You will be given a function implementation and a series of unit tests. Your goal is to write a few sentences to explain why your implementation is wrong as indicated by the tests. You will need this as a hint when you try again later. Only provide the few sentence description in your answer, not the implementation."
-
-GO_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go programming assistant. You will be given your past function implementation, a series of unit tests, and a hint to change the implementation appropriately. Apply the changes below by writing the body of this function only.\n\n-----"
-GO_SELF_REFLECTION_COMPLETION_INSTRUCTION = "You are a Go programming assistant. You will be given a function implementation and a series of unit tests. Your goal is to write a few sentences to explain why your implementation is wrong as indicated by the tests. You will need this as a hint when you try again later. Only provide the few sentence description in your answer, not the implementation.\n\n-----"
 
 GO_REFLECTION_FEW_SHOT_ADD = '''Example 1:
 [previous impl]:
