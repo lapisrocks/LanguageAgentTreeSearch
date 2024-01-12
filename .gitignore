@@ -4,3 +4,5 @@ dist/
 *.pyc
 *.DS_Store
 **/logs
+.venv/
+.vscode/

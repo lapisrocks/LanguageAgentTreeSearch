@@ -1,5 +1,6 @@
 from .py_generate import PyGenerator
 from .rs_generate import RsGenerator
+from .go_generate import GoGenerator
 from .generator_types import Generator
 from .model import CodeLlama, ModelBase, GPT4, GPT35, StarChat, GPTDavinci
 
@@ -9,6 +10,8 @@ def generator_factory(lang: str) -> Generator:
         return PyGenerator()
     elif lang == "rs" or lang == "rust":
         return RsGenerator()
+    elif lang == "go" or lang == "golang":
+        return GoGenerator()
     else:
         raise ValueError(f"Invalid language for generator: {lang}")
 
