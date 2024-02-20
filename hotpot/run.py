@@ -5,6 +5,8 @@ import argparse
 from hotpotqa import HotPotQATask
 from models import gpt_usage
 from lats import lats_search
+from tot import dfs_search
+from rap import mcts_search
 import logging
 
 def run(args):
@@ -23,8 +25,14 @@ def run(args):
 
     for i in range(args.task_start_index, args.task_end_index):
         # solve
-        state, value, all_nodes, reward, em = lats_search(args, task, i, args.iterations, True)
-
+        if algorithm == 'lats':
+            state, value, all_nodes, reward, em = lats_search(args, task, i, args.iterations, True)
+        elif algorithm = 'tot':
+            state, value, all_nodes, reward, em = dfs_search(args, task, i, args.iterations, True)
+        elif algorithm = 'rap':
+            state, value, all_nodes, reward, em = mcts_search(args, task, i, args.iterations, True)
+        else:
+            raise Exception("Search algorithm option not valid")
          # log main metric
         if em is None:
             em = 0
@@ -48,6 +56,7 @@ def parse_args():
     args.add_argument('--n_evaluate_sample', type=int, default=1)
     args.add_argument('--iterations', type=int, default=50)
     args.add_argument('--log', type=str)
+    args.add_argument('--algorithm', type=str, choices=['lats', 'rap', 'tot'])
 
     args = args.parse_args()
     return args
