@@ -175,9 +175,9 @@ def dfs_search(args, task, idx, depth_limit=7, to_print=True):
     root = Node(state=None, question=x)
     all_nodes = []
     failed_trajectories = []
-    it = 0
+    iterations = 100 # Change this
     stack = [root]
-    while stack and it < 1:
+    while stack and it < iterations:
         node = stack.pop()
         logging.info(f"DFS at node depth {node.depth}...")
         
