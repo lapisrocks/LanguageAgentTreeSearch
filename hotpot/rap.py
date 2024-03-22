@@ -1,8 +1,8 @@
 import itertools
 import numpy as np
 from functools import partial
-from tot.models import gpt
-from tot.tasks import wikienv, wrappers
+from models import gpt
+import wikienv, wrappers
 import requests
 import logging
 

@@ -1,13 +1,13 @@
 import itertools
 import numpy as np
 from functools import partial
-from tot.models import gpt
-from tot.tasks import wikienv, wrappers
+from models import gpt
+import wikienv, wrappers
 import requests
 import logging
 
 # Configuring the logging
-logging.basicConfig(filename='tot_it.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
+logging.basicConfig(filename='tot_10it.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 # Test logging
 logging.info("This is a test log entryyyyyy.")
@@ -63,9 +63,9 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
     global reflection_map
     reflection_map = []
     if prompt_sample == 'standard':
-        prompt, reflection_map = task.standard_prompt_wrap(x, y)
+        prompt = task.standard_prompt_wrap(x, y)
     elif prompt_sample == 'cot':
-        prompt, reflection_map = task.cot_prompt_wrap(x, y, unique_trajectories)
+        prompt = task.cot_prompt_wrap(x, y, unique_trajectories)
     else:
         raise ValueError(f'prompt_sample {prompt_sample} not recognized')
     logging.info(f"PROMPT: {prompt}")
@@ -165,7 +165,7 @@ def collect_trajectory(node):
         node = node.parent
     return '\n'.join(reversed(trajectory))
 
-def dfs_search(args, task, idx, depth_limit=7, to_print=True):
+def dfs_search(args, task, idx, iterations, depth_limit=7, to_print=True):
     global gpt
     global failed_trajectories
     gpt = partial(gpt, model=args.backend, temperature=args.temperature)
@@ -175,8 +175,8 @@ def dfs_search(args, task, idx, depth_limit=7, to_print=True):
     root = Node(state=None, question=x)
     all_nodes = []
     failed_trajectories = []
-    iterations = 100 # Change this
-    stack = [root]
+    stack = [root] 
+    it = 0
     while stack and it < iterations:
         node = stack.pop()
         logging.info(f"DFS at node depth {node.depth}...")
