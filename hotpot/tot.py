@@ -7,7 +7,7 @@ import requests
 import logging
 
 # Configuring the logging
-logging.basicConfig(filename='tot_10it.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
+logging.basicConfig(filename='tot_150it.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 # Test logging
 logging.info("This is a test log entryyyyyy.")
@@ -63,9 +63,9 @@ def get_samples(task, x, y, n_generate_sample, prompt_sample, stop):
     global reflection_map
     reflection_map = []
     if prompt_sample == 'standard':
-        prompt = task.standard_prompt_wrap(x, y)
+        prompt = task.standard_prompt_wrap(x, y, [])
     elif prompt_sample == 'cot':
-        prompt = task.cot_prompt_wrap(x, y, unique_trajectories)
+        prompt = task.cot_prompt_wrap(x, y, [])
     else:
         raise ValueError(f'prompt_sample {prompt_sample} not recognized')
     logging.info(f"PROMPT: {prompt}")
@@ -187,6 +187,7 @@ def dfs_search(args, task, idx, iterations, depth_limit=7, to_print=True):
 
         if node.depth >= depth_limit:
             logging.info("Depth limit reached")
+            it += 1
             continue  # go to next iteration
 
         expand_node(node, args, task)
