@@ -17,6 +17,9 @@ More can be found at our [project website](https://andyz245.github.io/LanguageAg
 
 Check out our demo, CodeLATS at our [demo](https://huggingface.co/spaces/AIatUIUC/CodeLATS/tree/main)
 
+For a more general implementation for your application, please look at the LangChain implementation in LangGraph.
+https://github.com/langchain-ai/langgraph/tree/main/examples/lats 
+
 
 ### Reasoning + Acting (HotPotQA)
 
