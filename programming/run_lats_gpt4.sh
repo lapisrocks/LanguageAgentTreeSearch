@@ -7,4 +7,5 @@ python main.py \
   --model "gpt-4" \
   --pass_at_k "1" \
   --max_iters "8" \
+  --number_of_tests "2" \
   --verbose

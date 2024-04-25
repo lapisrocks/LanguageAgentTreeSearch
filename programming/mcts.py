@@ -92,12 +92,13 @@ def run_mcts(
     log_path: str,
     verbose: bool,
     is_leetcode: bool = False,
-    n: int = 5
+    n: int = 5,
+    number_of_tests: int = 2
 ) -> None:
     exe = executor_factory(language, is_leet=is_leetcode)
     gen = generator_factory(language)
     model = model_factory(model_name)
-    test_model = model_factory("gpt4")
+    test_model = model_factory(model_name)
     print_v = make_printv(verbose)
 
     num_items = len(dataset)
@@ -111,7 +112,7 @@ def run_mcts(
         if is_leetcode:
             tests_i = item['visible_tests']
         else:
-            tests_i = gen.internal_tests(item["prompt"], test_model, 6)
+            tests_i = gen.internal_tests(item["prompt"], test_model, number_of_tests)
 
         while cur_func_impl is None:
             cur_func_impl = gen.func_impl(item["prompt"], model, "simple")
@@ -149,6 +150,7 @@ def run_mcts(
         
         for cur_iter in range(max_iters):
             # Selection
+            tests_i = gen.internal_tests(item["prompt"], test_model, number_of_tests)
 
             node = root
             trajectory = {
@@ -230,7 +232,9 @@ def run_mcts(
                 while temp.parent:
                     temp = temp.parent
                     temp.update(reward)
-        
+
+            if is_solved:
+                break
         # Choose the best solution after all iterations
         if is_solved:
             best_solution = item["solution"]

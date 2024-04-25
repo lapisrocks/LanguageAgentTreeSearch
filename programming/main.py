@@ -29,7 +29,8 @@ def get_args():
                         help="The maximum number of self-improvement iterations", default=10)
     parser.add_argument("--expansion_factor", type=int,
                         help="The expansion factor for the reflexion UCS and A* strategy", default=3)
-
+    parser.add_argument("--number_of_tests", type=int,
+                        help="The maximum number of internal tests for each question", default=6)
     parser.add_argument("--is_leetcode", action='store_true',
                         help="To run the leetcode benchmark")  # Temporary
 
@@ -118,6 +119,7 @@ pass@k: {args.pass_at_k}
         log_path=log_path,
         verbose=args.verbose,
         expansion_factor=args.expansion_factor,
+        number_of_tests=args.number_of_tests,
         is_leetcode=args.is_leetcode
     )
 
