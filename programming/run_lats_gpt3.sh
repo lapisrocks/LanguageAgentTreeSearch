@@ -6,6 +6,7 @@ python main.py \
   --language "py" \
   --model "gpt-3.5-turbo" \
   --pass_at_k "1" \
-  --max_iters "8" \
-  --number_of_tests "6" \
+  --max_iters "4" \
+  --expansion_factor "3" \
+  --number_of_tests "4" \
   --verbose
