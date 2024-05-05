@@ -1,4 +1,4 @@
-# Official Repo of Language Agent Tree Search (LATS)
+# Official Repo of Language Agent Tree Search (LATS) - ICML 2024
 
 <p>
     <a href="https://www.python.org/">
@@ -11,7 +11,7 @@
 
 ![teaser](pics/teaser.png)
 
-Official implementation for paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models](https://arxiv.org/abs/2310.04406) with code, prompts, model outputs. 
+Official implementation for ICML 2024 paper [Language Agent Tree Search Unifies Reasoning Acting and Planing in Language Models](https://arxiv.org/abs/2310.04406) with code, prompts, model outputs. 
 
 More can be found at our [project website](https://andyz245.github.io/LanguageAgentTreeSearch/) or [paper](https://arxiv.org/abs/2310.04406)
 
