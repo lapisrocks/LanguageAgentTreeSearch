@@ -17,8 +17,11 @@ More can be found at our [project website](https://andyz245.github.io/LanguageAg
 
 Check out our demo, CodeLATS at our [demo](https://huggingface.co/spaces/AIatUIUC/CodeLATS/tree/main)
 
-For a more general implementation for your application, please look at the LangChain implementation in LangGraph.
+For a more general implementation for your AI applications, please look at the LangChain implementation in LangGraph.
 https://github.com/langchain-ai/langgraph/tree/main/examples/lats 
+
+or the LlamaIndex implementation
+https://docs.llamaindex.ai/en/latest/api_reference/agent/lats/ 
 
 
 ### Reasoning + Acting (HotPotQA)
