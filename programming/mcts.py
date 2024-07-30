@@ -136,7 +136,7 @@ def run_mcts(
             is_passing = exe.evaluate(
                 item["entry_point"], cur_func_impl, item["test"], timeout=10)
             is_solved = is_passing
-            num_success += 1
+            num_success += int(is_passing)
             item["acc"] = round(num_success/(idx+1), 2)
             write_jsonl(log_path, [item], append=True)
             print(num_success)
